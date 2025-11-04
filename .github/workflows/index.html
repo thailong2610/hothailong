@@ -1,1 +1,251 @@
 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trình Chạy Mã HTML</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            gap: 10px;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .editor-section, .preview-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1000;
+            border-radius: 0;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            z-index: 1001;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: rgba(118, 75, 162, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        textarea {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        iframe {
+            flex: 1;
+            border: none;
+            background: white;
+        }
+
+        .button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .button:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Trình Chạy Mã HTML</h1>
+    </div>
+
+    <button class="back-button hidden" id="backButton" onclick="backToEditor()">← Quay lại soạn thảo</button>
+
+    <div class="container">
+        <div class="editor-section" id="editorSection">
+            <div class="section-header">
+                <span>📝 Soạn Thảo HTML</span>
+                <button class="button" onclick="runCode()">▶️ Chạy Mã</button>
+            </div>
+            <textarea id="htmlCode" placeholder="Nhập mã HTML của bạn vào đây..."><!DOCTYPE html>
+<html>
+<head>
+    <title>Ví dụ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        h1 {
+            font-size: 48px;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Xin chào! 👋</h1>
+    <p>Chỉnh sửa mã HTML và nhấn "Chạy Mã" để xem kết quả!</p>
+</body>
+</html></textarea>
+        </div>
+
+        <div class="preview-section" id="previewSection">
+            <div class="section-header" id="previewHeader">
+                <span>👁️ Kết Quả</span>
+                <button class="button" onclick="clearPreview()">🗑️ Xóa</button>
+            </div>
+            <iframe id="preview"></iframe>
+        </div>
+    </div>
+
+    <script>
+        function runCode() {
+            const code = document.getElementById('htmlCode').value;
+            const preview = document.getElementById('preview');
+            const previewDoc = preview.contentDocument || preview.contentWindow.document;
+            
+            previewDoc.open();
+            previewDoc.write(code);
+            previewDoc.close();
+
+            // Ẩn editor và header, hiện preview toàn màn hình
+            document.querySelector('.header').classList.add('hidden');
+            document.getElementById('editorSection').classList.add('hidden');
+            document.getElementById('previewHeader').classList.add('hidden');
+            document.getElementById('previewSection').classList.add('fullscreen');
+            document.getElementById('backButton').classList.remove('hidden');
+        }
+
+        function backToEditor() {
+            // Hiện lại editor và header
+            document.querySelector('.header').classList.remove('hidden');
+            document.getElementById('editorSection').classList.remove('hidden');
+            document.getElementById('previewHeader').classList.remove('hidden');
+            document.getElementById('previewSection').classList.remove('fullscreen');
+            document.getElementById('backButton').classList.add('hidden');
+        }
+
+        function clearPreview() {
+            const preview = document.getElementById('preview');
+            const previewDoc = preview.contentDocument || preview.contentWindow.document;
+            
+            previewDoc.open();
+            previewDoc.write('');
+            previewDoc.close();
+        }
+
+        // Chạy mã mẫu khi trang được tải
+        window.onload = function() {
+            const code = document.getElementById('htmlCode').value;
+            const preview = document.getElementById('preview');
+            const previewDoc = preview.contentDocument || preview.contentWindow.document;
+            
+            previewDoc.open();
+            previewDoc.write(code);
+            previewDoc.close();
+        };
+
+        // Tự động chạy khi nhấn Ctrl+Enter
+        document.getElementById('htmlCode').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                runCode();
+            }
+        });
+    </script>
+</body>
+</html>
